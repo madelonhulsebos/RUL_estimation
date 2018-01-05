@@ -41,7 +41,7 @@ for t=1:k
        % First prediction
        st = [(1.6369e5 + (-226.5514) * sensor_obs(1,1) + 0.0784 * ...
            sensor_obs(1,1)^2); (1.6369e5 + (-226.5514) * sensor_obs(1,1) + 0.0784 * ...
-           sensor_obs(1,1)^2)+1; 0 ];
+           sensor_obs(1,1)^2)+1; -1 ];
        st_matrix(:,t) = st;
 
        % Initial covariance 
@@ -93,12 +93,12 @@ end
 
 estimation_residual = RUL_true - mean_KF(1,:);
 
-figure; plot(mean_KF(1,:)); hold on;
-plot(RUL_true); hold on;
+figure; plot(RUL_true); hold on;
+plot(mean_KF(1,:)); hold on;
 plot(estimation_residual);
 
-RMSE_training = (1/size(RUL_true,2)) * sum(estimation_residual.^2);
-% RMSE = 802.5471
+RMSE_training = sqrt((1/size(RUL_true,2)) * sum(estimation_residual.^2));
+% RMSE = 28.33
 
 
 %% Evaluation of EKF by means of the test data
@@ -148,7 +148,7 @@ for i = 1:sensordata_test(n,1)
            % First prediction
            st = [(1.6369e5 + (-226.5514) * sensor_obs(1,1) + 0.0784 * ...
                sensor_obs(1,1)^2); (1.6369e5 + (-226.5514) * sensor_obs(1,1) + 0.0784 * ...
-               sensor_obs(1,1)^2)+1; 0 ];
+               sensor_obs(1,1)^2)+1; -1 ];
            st_matrix(:,t) = st;
            
            % Initial covariance 
@@ -199,6 +199,7 @@ for i = 1:sensordata_test(n,1)
     end
     
     RUL_estimated(i,1) = mean_KF(1,k);
+    cycles_in_run(i) = k;
 
 end
 
@@ -218,7 +219,7 @@ for j = 1:size(estimation_residual,1)
     
     if res < 0
     
-        score = score + exp(-res/13) - 1;
+        score = score + exp(-(res/13)) - 1;
         
     else
     
@@ -230,5 +231,5 @@ end
 % Score = 4.3788e+03
 
 % Equal weights to early and late detections RMSE:
-RMSE = (1/size(sensordata_test_RUL,1)) * sum(estimation_residual.^2);
-% RMSE = 1.2708e+03
+RMSE = sqrt(1/size(sensordata_test_RUL,1) * sum(estimation_residual.^2));
+% RMSE = 35.65
